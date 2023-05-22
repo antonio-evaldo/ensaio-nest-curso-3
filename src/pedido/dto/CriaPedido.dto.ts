@@ -8,13 +8,14 @@ import {
 } from 'class-validator';
 
 class ItemPedidoDTO {
+  @IsUUID()
+  produtoId: string;
+
   @IsInt()
   quantidade: number;
 }
 
 export class CriaPedidoDTO {
-  @IsUUID()
-  produtoId: string;
   @ValidateNested()
   @IsArray()
   @ArrayMinSize(1)
