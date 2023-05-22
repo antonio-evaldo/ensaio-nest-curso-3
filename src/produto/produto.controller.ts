@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseUUIDPipe,
   Post,
   Put,
 } from '@nestjs/common';
@@ -45,7 +46,7 @@ export class ProdutoController {
 
   @Put('/:id')
   async atualiza(
-    @Param('id') id: string,
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() dadosProduto: AtualizaProdutoDTO,
   ) {
     const produtoAlterado = await this.produtoService.atualizaProduto(
