@@ -4,6 +4,7 @@ import {
   IsArray,
   IsInt,
   IsUUID,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -12,6 +13,7 @@ class ItemPedidoDTO {
   produtoId: string;
 
   @IsInt()
+  @Min(1)
   quantidade: number;
 }
 

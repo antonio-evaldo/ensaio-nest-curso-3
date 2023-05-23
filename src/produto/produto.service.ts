@@ -13,6 +13,8 @@ export class ProdutoService {
   ) {}
 
   async criaProduto(produtoEntity: ProdutoEntity) {
+    throw new Error('Simulando erro de banco de dados...');
+
     return await this.produtoRepository.save(produtoEntity);
   }
 

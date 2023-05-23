@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CriaPedidoDTO } from './dto/CriaPedido.dto';
 import { AtualizaPedidoDTO } from './dto/AtualizaPedido.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,21 +43,17 @@ export class PedidoService {
       id: In(produtosIds),
     });
 
+    this.trataDadosDoPedido(dadosDoPedido, produtosRelacionados);
+
     const itensPedidoEntidades = dadosDoPedido.itensPedido.map((itemPedido) => {
       const produtoRelacionado = produtosRelacionados.find(
         (produto) => produto.id === itemPedido.produtoId,
       );
 
-      if (produtoRelacionado === undefined) {
-        throw new NotFoundException(
-          `O produto de id ${itemPedido.produtoId} não foi encontrado.`,
-        );
-      }
-
       const itemPedidoEntity = new ItemPedidoEntity();
 
-      itemPedidoEntity.produto = produtoRelacionado;
-      itemPedidoEntity.precoVenda = produtoRelacionado.valor;
+      itemPedidoEntity.produto = produtoRelacionado!;
+      itemPedidoEntity.precoVenda = produtoRelacionado!.valor;
 
       itemPedidoEntity.quantidade = itemPedido.quantidade;
 
@@ -81,6 +82,29 @@ export class PedidoService {
       relations: {
         usuario: true,
       },
+    });
+  }
+
+  private trataDadosDoPedido(
+    dadosDoPedido: CriaPedidoDTO,
+    produtosRelacionados: ProdutoEntity[],
+  ) {
+    dadosDoPedido.itensPedido.forEach((itemPedido) => {
+      const produtoRelacionado = produtosRelacionados.find(
+        (produto) => produto.id === itemPedido.produtoId,
+      );
+
+      if (produtoRelacionado === undefined) {
+        throw new NotFoundException(
+          `O produto de id ${itemPedido.produtoId} não foi encontrado.`,
+        );
+      }
+
+      if (itemPedido.quantidade > produtoRelacionado.quantidadeDisponivel) {
+        throw new BadRequestException(
+          `A quantidade solicitada (${itemPedido.quantidade}) para o produto ${produtoRelacionado.nome} é maior do que a disponível (${produtoRelacionado.quantidadeDisponivel})`,
+        );
+      }
     });
   }
 }
